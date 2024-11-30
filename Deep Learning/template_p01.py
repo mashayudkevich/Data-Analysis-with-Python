@@ -14,20 +14,28 @@ def softmax(vector):
     return softmax_
 
 def multiplicative_attention(decoder_hidden_state, encoder_hidden_states, W_mult):
-    '''
+    """
     decoder_hidden_state: np.array of shape (n_features_dec, 1)
     encoder_hidden_states: np.array of shape (n_features_enc, n_states)
     W_mult: np.array of shape (n_features_dec, n_features_enc)
     
     return: np.array of shape (n_features_enc, 1)
         Final attention vector
-    '''
-    # your code here
+    """
+    # Calculate the attention scores
+    scores = np.dot(W_mult.T, decoder_hidden_state).T
+    scores = np.dot(scores, encoder_hidden_states)
     
+    # Apply softmax
+    weights = softmax(scores)
+    
+    # Compute the final attention vector
+    attention_vector = np.dot(weights, encoder_hidden_states.T).T
     return attention_vector
 
+
 def additive_attention(decoder_hidden_state, encoder_hidden_states, v_add, W_add_enc, W_add_dec):
-    '''
+    """
     decoder_hidden_state: np.array of shape (n_features_dec, 1)
     encoder_hidden_states: np.array of shape (n_features_enc, n_states)
     v_add: np.array of shape (n_features_int, 1)
@@ -36,7 +44,17 @@ def additive_attention(decoder_hidden_state, encoder_hidden_states, v_add, W_add
     
     return: np.array of shape (n_features_enc, 1)
         Final attention vector
-    '''
-    # your code here
+    """
+    # Calculate the attention scores
+    encoder_terms = np.dot(W_add_enc.T, encoder_hidden_states)
+    decoder_terms = np.dot(W_add_dec.T, decoder_hidden_state)
     
+    # Add encoder and decoder terms, apply activation function
+    scores = np.dot(v_add.T, np.tanh(encoder_terms + decoder_terms))
+    
+    # Apply softmax
+    weights = softmax(scores)
+    
+    # Compute the final attention vector
+    attention_vector = np.dot(weights, encoder_hidden_states.T).T
     return attention_vector
